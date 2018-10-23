@@ -46,6 +46,7 @@ func TestFlags(t *testing.T) {
 	dns := flags.String("d", "", "DNS `server` IP address to use. This can be specified for name "+
 		"resolution on systems that don't use the traditional DNS server configurations such as "+
 		"/etc/resolv.conf.")
+	extra := flags.Int("extra", 0, "Test extra `details` like larger flag names and the rendering of the % sign.")
 
 	exp := "pping - Protocol Ping\n" +
 		"  Tool to simulate TCP and UDP pings. This can also be used as a port\n" +
@@ -54,19 +55,23 @@ func TestFlags(t *testing.T) {
 		"Usage: pping [options] host port\n" +
 		"\n" +
 		"Options:\n" +
-		"  -c num       Stop after sending specified number of pings.\n" +
-		"  -d server    DNS server IP address to use. This can be specified for\n" +
-		"               name resolution on systems that don't use the traditional\n" +
-		"               DNS server configurations such as /etc/resolv.conf.\n" +
-		"  -i time      Interval time between pings in ms (default=1000).\n" +
-		"  -p protocol  Specify protocol to use. Valid values are (default=tcp):\n" +
-		"               - tcp: also supports 4 or 6 only counterparts.\n" +
-		"               - udp: also supports 4 or 6 only counterparts.\n" +
-		"  -s size      Payload size in bytes (default=64).\n" +
-		"  -t time      Max time-to-live for each ping (in ms) before moving on\n" +
-		"               to the next attempt (default=10000).\n" +
-		"  -w           Wait for a response from the server. Ideally, this should\n" +
-		"               be set when the protocol is set to udp.\n" +
+		"  -c     num       Stop after sending specified number of pings.\n" +
+		"  -d     server    DNS server IP address to use. This can be specified\n" +
+		"                   for name resolution on systems that don't use the\n" +
+		"                   traditional DNS server configurations such as\n" +
+		"                   /etc/resolv.conf.\n" +
+		"  -extra details   Test extra details like larger flag names and the\n" +
+		"                   rendering of the % sign.\n" +
+		"  -i     time      Interval time between pings in ms (default=1000).\n" +
+		"  -p     protocol  Specify protocol to use. Valid values are\n" +
+		"                   (default=tcp):\n" +
+		"                   - tcp: also supports 4 or 6 only counterparts.\n" +
+		"                   - udp: also supports 4 or 6 only counterparts.\n" +
+		"  -s     size      Payload size in bytes (default=64).\n" +
+		"  -t     time      Max time-to-live for each ping (in ms) before moving\n" +
+		"                   on to the next attempt (default=10000).\n" +
+		"  -w               Wait for a response from the server. Ideally, this\n" +
+		"                   should be set when the protocol is set to udp.\n" +
 		"\n" +
 		"Examples:\n" +
 		"  pping -s 128 google.com 80\n" +
@@ -95,7 +100,7 @@ func TestFlags(t *testing.T) {
 	}
 
 	// Test drop-in functionality
-	if err := flags.Parse(strings.Split("-c 35 -d 8.8.8.8 -w", " ")); err != nil {
+	if err := flags.Parse(strings.Split("-c 35 -d 8.8.8.8 -w -extra 7", " ")); err != nil {
 		t.Fatal("error when parsing", err)
 	}
 
@@ -103,6 +108,7 @@ func TestFlags(t *testing.T) {
 	compare(t, "8.8.8.8", *dns)
 	compare(t, true, *wait)
 	compare(t, false, flags.AskingHelp())
+	compare(t, 7, *extra)
 }
 
 func TestHelpChecker(t *testing.T) {

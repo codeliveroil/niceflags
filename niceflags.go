@@ -110,18 +110,22 @@ func (f *Flags) Help() {
 
 // PrintHelp prints the help screen.
 func (f *Flags) PrintHelp() {
-	PrintErr(f.HelpText())
+	PrintErr(sanitize(f.HelpText()))
 }
 
 // HelpText returns the help text.
+// % signs in any user given text is prefixed with another % (i.e. %%) so
+// that they are escaped if passed to a formatter like Printf or Sprintf.
 func (f *Flags) HelpText() string {
 	var buf bytes.Buffer
+
 	write := func(msg string, args ...interface{}) {
 		buf.WriteString(fmt.Sprintf(msg, args...))
 	}
 
+	// Title
 	if f.Title != "" {
-		write(f.Title + "\n")
+		write(sanitize(f.Title) + "\n")
 	}
 
 	pad := func(s string, l int) string {
@@ -167,13 +171,16 @@ func (f *Flags) HelpText() string {
 		}
 	}
 
+	// Description
 	if f.Description != "" {
-		wrapText(f.Description, 2, maxLineLength, true)
+		wrapText(sanitize(f.Description), 2, maxLineLength, true)
 		write("\n")
 	}
 
-	write("Usage: %s %s\n", f.cmdName, f.UsageOptions)
+	// Command usage
+	write("Usage: %s %s\n", f.cmdName, sanitize(f.UsageOptions))
 
+	// Option/Flag details
 	write("\nOptions:\n")
 	maxFlagLen := 0
 	maxParamLen := 0
@@ -191,7 +198,7 @@ func (f *Flags) HelpText() string {
 		}
 
 		param := ""
-		usage := fl.Usage
+		usage := sanitize(fl.Usage)
 		if !isZeroValue(fl, fl.DefValue) {
 			if f.PrintAllDefaults {
 				usage = strings.Replace(usage, "`default`", "", -1)
@@ -226,10 +233,11 @@ func (f *Flags) HelpText() string {
 		wrapText(fl[2], len(s), maxLineLength, false)
 	}
 
+	// Examples
 	if f.Examples != nil && len(f.Examples) > 0 {
 		write("\nExamples:\n")
 		for _, e := range f.Examples {
-			write("  %s %s\n", f.cmdName, e)
+			write("  %s %s\n", f.cmdName, sanitize(e))
 		}
 	}
 
@@ -259,6 +267,10 @@ func isZeroValue(fl *flag.Flag, value string) bool {
 		return true
 	}
 	return false
+}
+
+func sanitize(msg string) string {
+	return strings.Replace(msg, "%", "%%", -1)
 }
 
 // PrintErr prints to stderr because that's where
