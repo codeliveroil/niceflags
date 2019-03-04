@@ -35,6 +35,9 @@ type Flags struct {
 	// for a port scanner, you would just specify "[options] host port";
 	// so when the usage is printed, it'll be printed as:
 	// portscanner [options] host port
+	// You can optionally include a usage description succeeding the first line,
+	// separated by new lines and this description will be wrapped to the
+	// terminal length.
 	UsageOptions string
 
 	// Examples defines examples of the usage. Just as in UsageOptions,
@@ -178,7 +181,12 @@ func (f *Flags) HelpText() string {
 	}
 
 	// Command usage
-	write("Usage: %s %s\n", f.cmdName, sanitize(f.UsageOptions))
+	usageTokens := strings.Split(sanitize(f.UsageOptions), "\\n")
+	write("Usage: %s %s\n", f.cmdName, usageTokens[0])
+	if l := len(usageTokens); l > 1 {
+		rem := strings.Join(usageTokens[1:l], "\n")
+		wrapText(rem, 2, maxLineLength, true)
+	}
 
 	// Option/Flag details
 	write("\nOptions:\n")
