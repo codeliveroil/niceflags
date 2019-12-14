@@ -181,7 +181,7 @@ func (f *Flags) HelpText() string {
 	}
 
 	// Command usage
-	usageTokens := strings.Split(sanitize(f.UsageOptions), "\\n")
+	usageTokens := strings.Split(sanitize(f.UsageOptions), "\n")
 	write("Usage: %s %s\n", f.cmdName, usageTokens[0])
 	if l := len(usageTokens); l > 1 {
 		rem := strings.Join(usageTokens[1:l], "\n")
@@ -278,7 +278,8 @@ func isZeroValue(fl *flag.Flag, value string) bool {
 }
 
 func sanitize(msg string) string {
-	return strings.Replace(msg, "%", "%%", -1)
+	msg = strings.Replace(msg, "%", "%%", -1)
+	return strings.Replace(msg, "\\n", "\n", -1)
 }
 
 // PrintErr prints to stderr because that's where
